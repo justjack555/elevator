@@ -15,36 +15,18 @@ package main
 import(
 	"log"
 	"github.com/justjack555/elevator/pkg/master"
-	"net/rpc"
-	"errors"
 )
 
-// This will be moved to properties file or to front - end
+// Move to config file/UI
 const numMasters = 3
-var allMasters master.Master[]
 
-// Do all of master rpc setup
-func doSetup(i int) error {
-	log.Println("Registering the ", i, "th master...")
-	err := rpc.Register(master.New())
-	if err != nil {
-		log.Fatal("ERR: Registering master ", i, " - ", err, ". Terminating...")
-	}
-
-	rpc.HandleHTTP()
-	l, err := net.Listen("tcp", ":123" + string(i))
-	if e != nil {
-		log.Fatal("listen error:", err)
-	}
-	go http.Serve(l, nil)
-
-	return nil
-}
 
 // Main just starts masters
 func main(){
-	for i := 0; i < numMasters; i++ {
-		go doSetup(i)
+	errList := master.Start(numMasters)
+	for i, err := range errList {
+		log.Println("ERR: ", i, "th master terminated with error: ", err)
 	}
+
 }
 

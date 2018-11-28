@@ -1,7 +1,7 @@
 package worker
 
 import(
-	"fmt"
+	//"fmt"
 )
 
 type Worker struct {
