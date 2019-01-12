@@ -18,7 +18,7 @@ import(
 )
 
 // Move to config file/UI
-const numMasters = 3
+const numMasters = 1
 
 
 // Main just starts masters

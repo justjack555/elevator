@@ -6,6 +6,8 @@ import(
 	"net/http"
 	"net"
 	"sync"
+	"strings"
+	"strconv"
 //	"github.com/justjack555/elevator/pkg/common"
 )
 
@@ -51,6 +53,7 @@ func serveAndReturnErr(l net.Listener, serverErrChan chan error){
 	the provided channel
 **/
 func launchMaster(indx int, ch chan *masterResponse){
+	var portStr strings.Builder
 	serverErrChan := make(chan error)
 	log.Println("Registering the ", indx, "th master...")
 	m := createMaster()
@@ -66,7 +69,10 @@ func launchMaster(indx int, ch chan *masterResponse){
 	}
 
 	rpc.HandleHTTP()
-	l, err := net.Listen("tcp", PORT + string(indx))
+	portStr.WriteString(PORT)
+	portStr.WriteString(strconv.Itoa(indx))
+	log.Println("LAUNCH_MASTER(): portStr is: ", portStr.String())
+	l, err := net.Listen("tcp", portStr.String())
 	if err != nil {
 		log.Println("ERR: Listen error:", err)
 		ch <- &masterResponse{
@@ -90,7 +96,7 @@ func launchMaster(indx int, ch chan *masterResponse){
 	and wait for any errors
 **/
 func Start(numMasters int) []error {
-	var errorList []error
+	errorList := make([]error, numMasters, numMasters)
 	ch := make(chan *masterResponse)
 
 
