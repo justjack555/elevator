@@ -6,12 +6,10 @@ import(
 	"net/http"
 	"net"
 	"sync"
-//	"errors"
-	"github.com/justjack555/elevator/pkg/worker"
+	"github.com/justjack555/elevator/pkg/elevator"
 )
 
 type Master struct {
-	workers []worker
 }
 
 // Struct master returns once it completes serving
@@ -26,15 +24,15 @@ type masterState struct {
 	mux sync.Mutex
 }
 
-// This will be moved to properties file or to front - end
+// This will be moved to config file
 const PORT = ":123"
 
 /**
  Defacto constructor to return new master
 * */
-func new() *Master{
+func createMaster() *Master{
 	return &Master{
-		workers : nil,
+		elevators : nil,
 	}
 }
 
@@ -45,31 +43,37 @@ func new() *Master{
 func serveAndReturnErr(l net.Listener, serverErrChan chan error){
 	serverErrChan <- http.Serve(l, nil)
 }
+
 /**
 	Setup and Launch each RPC Server that functions as a master
+	Masters are registered, established as HTTP Request listeners,
+	and started.
+
+	If they return an error, this is handled by passing the value into
+	the provided channel
 **/
-func doMasterSetup(indx int, ch chan *masterResponse){
+func launchMaster(indx int, ch chan *masterResponse){
 	serverErrChan := make(chan error)
 	log.Println("Registering the ", indx, "th master...")
-	m := new()
+	m := createMaster()
 
-	// Register new master as RPC server
 	err := rpc.Register(m)
 	if err != nil {
-		log.Fatal("ERR: Registering master ", indx, " - ", err, ". Terminating...")
+		log.Println("ERR: Registering master ", indx, " - ", err, ". Terminating this server...")
+		ch <- err
+		return
 	}
 
-	// The masters will listen for HTTP Requests
 	rpc.HandleHttp()
 	l, err := net.Listen("tcp", PORT + string(indx))
 	if err != nil {
-		log.Fatal("ERR: Listen error:", err)
+		log.Println("ERR: Listen error:", err)
+		ch <- err
+		return
 	}
 
-	// Start the server
 	go serveAndReturnErr(l, serverErrChan)
 
-	// Server has returned an error. Handle this and return
 	res := <- serverErrChan
 	ch <- &masterResponse{
 		masterIndx: indx,
@@ -79,18 +83,17 @@ func doMasterSetup(indx int, ch chan *masterResponse){
 
 /**
 	Start designated number of masters
+	and wait for any errors
 **/
 func Start(numMasters int) []error {
 	var errorList []error
 	ch := make(chan *masterResponse)
 
 
-	// Setup and Launch each RPC Server
 	for i := 0; i < numMasters; i++ {
-		go doMasterSetup(i, ch)
+		go launchMaster(i, ch)
 	}
 
-	// Collect each RPC Server's response
 	for i := 0; i < numMasters; i++ {
 		res := <- ch
 		errorList[res.masterIndx] = res.masterErr
