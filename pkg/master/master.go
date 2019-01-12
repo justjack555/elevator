@@ -6,7 +6,7 @@ import(
 	"net/http"
 	"net"
 	"sync"
-	"github.com/justjack555/elevator/pkg/elevator"
+//	"github.com/justjack555/elevator/pkg/common"
 )
 
 type Master struct {
@@ -31,9 +31,7 @@ const PORT = ":123"
  Defacto constructor to return new master
 * */
 func createMaster() *Master{
-	return &Master{
-		elevators : nil,
-	}
+	return &Master{}
 }
 
 /**
@@ -60,15 +58,21 @@ func launchMaster(indx int, ch chan *masterResponse){
 	err := rpc.Register(m)
 	if err != nil {
 		log.Println("ERR: Registering master ", indx, " - ", err, ". Terminating this server...")
-		ch <- err
+		ch <- &masterResponse{
+			masterIndx: indx,
+			masterErr: err,
+		}
 		return
 	}
 
-	rpc.HandleHttp()
+	rpc.HandleHTTP()
 	l, err := net.Listen("tcp", PORT + string(indx))
 	if err != nil {
 		log.Println("ERR: Listen error:", err)
-		ch <- err
+		ch <- &masterResponse{
+			masterIndx: indx,
+			masterErr: err,
+		}
 		return
 	}
 

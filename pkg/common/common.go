@@ -1,7 +1,6 @@
 package common
 
 import (
-	"github.com/justjack555/elevator/pkg/elevator"
 	"time"
 )
 
@@ -13,6 +12,18 @@ const (
 	DOWN Direction = -1
 )
 
+/**
+	Define Elevator structure here
+	as it is the sole common structure
+	that must be shared across services
+**/
+type Elevator struct {
+	isActive bool
+	currentFloor int
+	lastChecked time.Time
+	direction Direction
+}
+
 type MasterAssignRequest struct {
 	numPeople int
 	floor int
@@ -20,23 +31,23 @@ type MasterAssignRequest struct {
 }
 
 type MasterAssignReply struct {
-	elevator *elevator.Elevator
+	elevator *Elevator
 }
 
-type ElevatorStatusRequest nil
+type ElevatorStatusRequest struct{}
 
 type ElevatorStatusReply struct {
 	currentFloor int
 	direction Direction
 }
 
-type LocationRequest struct {
+type ElevatorLocationRequest struct {
 	lastFloor int
 	direction Direction
 	lastTimestamp time.Time
 }
 
-type LocationResponse struct {
+type ElevatorLocationResponse struct {
 	currentFloor int
 	newTimestamp time.Time
 }
