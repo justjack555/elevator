@@ -9,3 +9,7 @@ import(
 func (e *Elevator) getCurrentFloor() int{
 	return e.currentFloor
 }
+
+func Start(numElevators int) []error {
+	return nil
+}

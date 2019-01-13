@@ -41,6 +41,11 @@ type ElevatorStatusReply struct {
 	direction Direction
 }
 
+/**
+	Used by the selection service in the
+	background to maintain an updated
+	list of elevator locations
+ */
 type ElevatorLocationRequest struct {
 	lastFloor int
 	direction Direction

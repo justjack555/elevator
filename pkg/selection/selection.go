@@ -26,3 +26,7 @@ func (se SortedElevators) Swap(i, j int) {
 func (se SortedElevators) Less(i, j int) bool {
 	return se[i].getCurrentFloor() < se[j].getCurrentFloor()
 }
+
+func Start(numSelectors int) []error {
+	return nil
+}
