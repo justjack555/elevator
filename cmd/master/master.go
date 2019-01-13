@@ -17,7 +17,7 @@ import(
 	"github.com/justjack555/elevator/pkg/master"
 )
 
-// Move to config file/UI
+// Move to config file/UI - currently only support one master
 const numMasters = 1
 
 

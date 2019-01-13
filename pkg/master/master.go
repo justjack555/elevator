@@ -2,12 +2,8 @@ package master
 
 import(
 	"log"
-	"net/rpc"
 	"net/http"
-	"net"
 	"sync"
-	"strings"
-	"strconv"
 //	"github.com/justjack555/elevator/pkg/common"
 )
 
@@ -26,63 +22,51 @@ type masterState struct {
 	mux sync.Mutex
 }
 
-// This will be moved to config file
-const PORT = ":123"
-
 /**
  Defacto constructor to return new master
 * */
 func createMaster() *Master{
-	return &Master{}
+	log.Println("Master.CreateMaster(): Invoked")
+	return new(Master)
+}
+
+/**
+	Load all of the HTTP handler functions
+	for requests
+**/
+func loadHandlers() {
+	routes := map[string] http.Handler {
+		"/elevator/" : elevatorHandler(),
+	}
+
+	for pattern, handler := range routes {
+		http.Handle(pattern, handler)
+	}
 }
 
 /**
 	Helper to start an HTTP server and send its termination error
 	to a waiting channel
 **/
-func serveAndReturnErr(l net.Listener, serverErrChan chan error){
-	serverErrChan <- http.Serve(l, nil)
+func serveAndReturnErr(port string, serverErrChan chan error){
+	serverErrChan <- http.ListenAndServe(port, nil)
 }
 
 /**
-	Setup and Launch each RPC Server that functions as a master
-	Masters are registered, established as HTTP Request listeners,
-	and started.
+	Setup and Launch each HTTP Server that functions as a master
+	Masters have their route handling registered and then setup to
+	listen
 
 	If they return an error, this is handled by passing the value into
 	the provided channel
 **/
 func launchMaster(indx int, ch chan *masterResponse){
-	var portStr strings.Builder
 	serverErrChan := make(chan error)
 	log.Println("Registering the ", indx, "th master...")
-	m := createMaster()
 
-	err := rpc.Register(m)
-	if err != nil {
-		log.Println("ERR: Registering master ", indx, " - ", err, ". Terminating this server...")
-		ch <- &masterResponse{
-			masterIndx: indx,
-			masterErr: err,
-		}
-		return
-	}
+	loadHandlers()
 
-	rpc.HandleHTTP()
-	portStr.WriteString(PORT)
-	portStr.WriteString(strconv.Itoa(indx))
-	log.Println("LAUNCH_MASTER(): portStr is: ", portStr.String())
-	l, err := net.Listen("tcp", portStr.String())
-	if err != nil {
-		log.Println("ERR: Listen error:", err)
-		ch <- &masterResponse{
-			masterIndx: indx,
-			masterErr: err,
-		}
-		return
-	}
-
-	go serveAndReturnErr(l, serverErrChan)
+	go serveAndReturnErr(constructPort(indx), serverErrChan)
 
 	res := <- serverErrChan
 	ch <- &masterResponse{
@@ -106,6 +90,7 @@ func Start(numMasters int) []error {
 
 	for i := 0; i < numMasters; i++ {
 		res := <- ch
+		log.Println("ERR: Master #", res.masterIndx, " failed with error: ", res.masterErr)
 		errorList[res.masterIndx] = res.masterErr
 	}
 
