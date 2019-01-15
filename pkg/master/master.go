@@ -4,7 +4,7 @@ import(
 	"log"
 	"net/http"
 	"sync"
-//	"github.com/justjack555/elevator/pkg/common"
+	"github.com/justjack555/elevator/pkg/common"
 )
 
 type Master struct {
@@ -21,6 +21,9 @@ type masterState struct {
 	allMasters []*Master
 	mux sync.Mutex
 }
+
+// This will be moved to config file
+const PORT = ":123"
 
 /**
  Defacto constructor to return new master
@@ -66,7 +69,7 @@ func launchMaster(indx int, ch chan *masterResponse){
 
 	loadHandlers()
 
-	go serveAndReturnErr(constructPort(indx), serverErrChan)
+	go serveAndReturnErr(common.ConstructPort(PORT, indx), serverErrChan)
 
 	res := <- serverErrChan
 	ch <- &masterResponse{

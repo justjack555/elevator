@@ -52,7 +52,11 @@ type ElevatorLocationRequest struct {
 	lastTimestamp time.Time
 }
 
-type ElevatorLocationResponse struct {
+type ElevatorLocationReply struct {
 	currentFloor int
 	newTimestamp time.Time
+}
+
+func (e *Elevator) GetCurrentFloor() int{
+	return e.currentFloor
 }
