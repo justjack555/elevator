@@ -1,0 +1,6 @@
+#!/bin/bash
+go build cmd/master/master.go
+go build cmd/selection/selection.go
+
+./master &
+./selection

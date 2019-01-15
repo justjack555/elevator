@@ -4,9 +4,29 @@ import (
 	"log"
 	"fmt"
 	"net/http"
-//	"github.com/justjack555/elevator/pkg/common"
+	"net/rpc"
+
+	"github.com/justjack555/elevator/pkg/common"
 )
 
+func requestElevator(client *rpc.Client) *common.Elevator{
+	var reply common.MasterAssignReply
+
+	args := &common.MasterAssignRequest {
+		NumPeople : 2,
+		Floor : 1,
+		Direction : -1,
+	}
+
+	err := client.Call("Selection.AssignElevator", args, &reply)
+	if err != nil {
+		log.Fatal("Selection.AssignElevator:", err)
+	}
+
+//	log.Println("Handler.RequestElevator(): Reply: ", reply.Elevator)
+
+	return reply.Elevator
+}
 /**
 	Handler for calls to elevator/*
 
@@ -19,6 +39,13 @@ func elevatorHandler() http.Handler {
 // 		Here we'll make the RPC call to the Selection Service
 		log.Println("ElevatorHandler():")
 
-		fmt.Fprintf(w, "Elevator handler...\n")
+		client, err := rpc.DialHTTP("tcp", common.SERVER_ADDRESS + common.SELECTOR_PORT)
+		if err != nil {
+			log.Fatal("ERR: Dialing error: ", err)
+		}
+
+		e := requestElevator(client)
+
+		fmt.Fprintf(w, "Elevator details: %v ...\n", e)
 	})
 }

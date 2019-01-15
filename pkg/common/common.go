@@ -10,6 +10,9 @@ const (
 	UP Direction = 1
 	NEUTRAL Direction = 0
 	DOWN Direction = -1
+	SERVER_ADDRESS = "localhost"
+	MASTER_PORT = ":1230"
+	SELECTOR_PORT = ":1240"
 )
 
 /**
@@ -18,20 +21,20 @@ const (
 	that must be shared across services
 **/
 type Elevator struct {
-	isActive bool
-	currentFloor int
-	lastChecked time.Time
-	direction Direction
+	IsActive bool
+	CurrentFloor int
+	LastChecked time.Time
+	Direction Direction
 }
 
 type MasterAssignRequest struct {
-	numPeople int
-	floor int
-	direction int
+	NumPeople int
+	Floor int
+	Direction int
 }
 
 type MasterAssignReply struct {
-	elevator *Elevator
+	Elevator *Elevator
 }
 
 type ElevatorStatusRequest struct{}
@@ -58,5 +61,5 @@ type ElevatorLocationReply struct {
 }
 
 func (e *Elevator) GetCurrentFloor() int{
-	return e.currentFloor
+	return e.CurrentFloor
 }
