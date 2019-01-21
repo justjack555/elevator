@@ -26,7 +26,7 @@ type Selection struct{
 }
 
 // This will be moved to config file
-const PORT = ":124"
+const PORT = "8081"
 
 func (se SortedElevators) Len() int {
 	return len(se)
@@ -84,7 +84,7 @@ func launchSelector(indx int, ch chan *selectorResponse){
 
 	rpc.HandleHTTP()
 
-	l, err := net.Listen("tcp", common.ConstructPort(PORT, indx))
+	l, err := net.Listen("tcp", common.ConstructPort(PORT))
 	if err != nil {
 		log.Println("ERR: Listen error:", err)
 		ch <- &selectorResponse{

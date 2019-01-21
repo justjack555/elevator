@@ -1,0 +1,11 @@
+---
+num_instances: 1
+ports:
+  - 8080
+
+## Allows us to connect to the selection service
+selection_config:
+  address: localhost
+  ports:
+    - 8081
+...

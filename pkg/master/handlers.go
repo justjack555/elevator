@@ -31,15 +31,15 @@ func requestElevator(client *rpc.Client) *common.Elevator{
 	Handler for calls to elevator/*
 
 	Parameters passed in as part of the request will
-	be utilized to form the RPC request to the selection
+	be utilized to form the RPC request to the selConfig
 	service.
  */
-func elevatorHandler() http.Handler {
+func elevatorHandler(selConfig SelectionConfig) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 // 		Here we'll make the RPC call to the Selection Service
 		log.Println("ElevatorHandler():")
 
-		client, err := rpc.DialHTTP("tcp", common.SERVER_ADDRESS + common.SELECTOR_PORT)
+		client, err := rpc.DialHTTP("tcp", selConfig.Address + common.ChoosePort(selConfig.Ports))
 		if err != nil {
 			log.Fatal("ERR: Dialing error: ", err)
 		}

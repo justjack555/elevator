@@ -23,7 +23,7 @@ type masterState struct {
 }
 
 // This will be moved to config file
-const PORT = ":123"
+//const PORT = ":123"
 
 /**
  Defacto constructor to return new master
@@ -37,9 +37,9 @@ func createMaster() *Master{
 	Load all of the HTTP handler functions
 	for requests
 **/
-func loadHandlers() {
+func loadHandlers(selConfig SelectionConfig) {
 	routes := map[string] http.Handler {
-		"/elevator/" : elevatorHandler(),
+		"/elevator/" : elevatorHandler(selConfig),
 	}
 
 	for pattern, handler := range routes {
@@ -63,13 +63,13 @@ func serveAndReturnErr(port string, serverErrChan chan error){
 	If they return an error, this is handled by passing the value into
 	the provided channel
 **/
-func launchMaster(indx int, ch chan *masterResponse){
+func launchMaster(indx int, selConfig SelectionConfig, port string, ch chan *masterResponse){
 	serverErrChan := make(chan error)
 	log.Println("Registering the ", indx, "th master...")
 
-	loadHandlers()
+	loadHandlers(selConfig)
 
-	go serveAndReturnErr(common.ConstructPort(PORT, indx), serverErrChan)
+	go serveAndReturnErr(common.ConstructPort(port), serverErrChan)
 
 	res := <- serverErrChan
 	ch <- &masterResponse{
@@ -82,13 +82,13 @@ func launchMaster(indx int, ch chan *masterResponse){
 	Start designated number of masters
 	and wait for any errors
 **/
-func Start(numMasters int) []error {
+func Start(numMasters int, selConfig SelectionConfig, ports []string) []error {
 	errorList := make([]error, numMasters, numMasters)
 	ch := make(chan *masterResponse)
 
 
 	for i := 0; i < numMasters; i++ {
-		go launchMaster(i, ch)
+		go launchMaster(i, selConfig, ports[i], ch)
 	}
 
 	for i := 0; i < numMasters; i++ {
