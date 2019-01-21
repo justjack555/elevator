@@ -23,7 +23,8 @@ const numSelectors = 1
 
 // Main just starts masters
 func main(){
-	errList := selection.Start(numSelectors)
+	sc := selection.LoadConfig()
+	errList := selection.Start(sc.Num_instances, sc.Ports, sc.Elevator_config)
 	for i, err := range errList {
 		log.Println("ERR: ", i, "th selector terminated with error: ", err)
 	}

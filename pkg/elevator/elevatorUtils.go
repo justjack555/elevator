@@ -12,7 +12,7 @@ type SelectionConfig struct {
 type MasterConfig struct {
 	Num_instances int
 	Ports []string
-	Selection_config *SelectionConfig
+	Selection_config SelectionConfig
 }
 
 const configPATH string = "cmd/master/master.yaml"

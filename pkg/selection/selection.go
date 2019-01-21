@@ -23,10 +23,8 @@ type SortedElevators []*common.Elevator
 
 type Selection struct{
 	elevators SortedElevators
+	elevConfig *ElevatorConfig
 }
-
-// This will be moved to config file
-const PORT = "8081"
 
 func (se SortedElevators) Len() int {
 	return len(se)
@@ -50,10 +48,15 @@ func serveAndReturnErr(l net.Listener, serverErrChan chan error){
 /**
 	Return a selection structure
 	with an empty list of elevators
+
+	For now we just store the elevator configuration.
+	This should be more adeptly binded to each elevator
+	structure
  */
-func createSelector() *Selection {
+func createSelector(elevConfig *ElevatorConfig) *Selection {
 	return &Selection {
 		elevators: make(SortedElevators, 0, 0),
+		elevConfig: elevConfig,
 	}
 }
 
@@ -66,11 +69,11 @@ func createSelector() *Selection {
 	If they return an error, this is handled by passing the value into
 	the provided channel
 **/
-func launchSelector(indx int, ch chan *selectorResponse){
+func launchSelector(indx int, port string, elevConfig *ElevatorConfig, ch chan *selectorResponse){
 	serverErrChan := make(chan error)
 	log.Println("Registering the ", indx, "th selector...")
 
-	s := createSelector()
+	s := createSelector(elevConfig)
 
 	err := rpc.Register(s)
 	if err != nil {
@@ -84,7 +87,7 @@ func launchSelector(indx int, ch chan *selectorResponse){
 
 	rpc.HandleHTTP()
 
-	l, err := net.Listen("tcp", common.ConstructPort(PORT))
+	l, err := net.Listen("tcp", common.ConstructPort(port))
 	if err != nil {
 		log.Println("ERR: Listen error:", err)
 		ch <- &selectorResponse{
@@ -107,13 +110,13 @@ func launchSelector(indx int, ch chan *selectorResponse){
 	Start designated number of masters
 	and wait for any errors
 **/
-func Start(numSelectors int) []error {
+func Start(numSelectors int, ports []string, elevConfig *ElevatorConfig) []error {
 	errorList := make([]error, numSelectors, numSelectors)
 	ch := make(chan *selectorResponse)
 
 
 	for i := 0; i < numSelectors; i++ {
-		go launchSelector(i, ch)
+		go launchSelector(i, ports[i], elevConfig, ch)
 	}
 
 	for i := 0; i < numSelectors; i++ {

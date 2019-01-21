@@ -37,7 +37,7 @@ func createMaster() *Master{
 	Load all of the HTTP handler functions
 	for requests
 **/
-func loadHandlers(selConfig SelectionConfig) {
+func loadHandlers(selConfig *SelectionConfig) {
 	routes := map[string] http.Handler {
 		"/elevator/" : elevatorHandler(selConfig),
 	}
@@ -63,7 +63,7 @@ func serveAndReturnErr(port string, serverErrChan chan error){
 	If they return an error, this is handled by passing the value into
 	the provided channel
 **/
-func launchMaster(indx int, selConfig SelectionConfig, port string, ch chan *masterResponse){
+func launchMaster(indx int, selConfig *SelectionConfig, port string, ch chan *masterResponse){
 	serverErrChan := make(chan error)
 	log.Println("Registering the ", indx, "th master...")
 
@@ -82,7 +82,7 @@ func launchMaster(indx int, selConfig SelectionConfig, port string, ch chan *mas
 	Start designated number of masters
 	and wait for any errors
 **/
-func Start(numMasters int, selConfig SelectionConfig, ports []string) []error {
+func Start(numMasters int, selConfig *SelectionConfig, ports []string) []error {
 	errorList := make([]error, numMasters, numMasters)
 	ch := make(chan *masterResponse)
 

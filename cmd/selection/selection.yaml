@@ -1,3 +1,13 @@
 ---
 num_instances: 1
+ports:
+  - 8081
+
+## Allows us to connect to the selection service
+elevator_config:
+  address: localhost
+  ports:
+    - 8083
+    - 8084
+    - 8085
 ...

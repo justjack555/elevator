@@ -2,7 +2,6 @@ package common
 
 import (
 	"bufio"
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
 	"log"
@@ -40,6 +39,27 @@ func ChoosePort(ports []string) string {
 }
 
 /**
+	Read all bytes from file of length size into
+	a byte array
+ */
+func getBytesFromReader(br *bufio.Reader, size int64) []byte {
+	b := make([]byte, size)
+	for {
+		_, err := br.Read(b)
+		if err != nil {
+			if err != io.EOF {
+				log.Fatalln("ERR: While reading from file: ", err)
+			}
+			log.Println("Reached EOF. Breaking...")
+			break;
+		}
+	}
+
+//	log.Println("LOAD_CONFIG(): Byte slice read from file is: ", string(b))
+	return b
+}
+
+/**
 	Read the server configuration for the
 	master from config file
  */
@@ -56,30 +76,11 @@ func LoadConfig(path string, c interface{}) {
 	}
 
 	filesize := fileinfo.Size()
-	b := make([]byte, filesize)
-
 	br := bufio.NewReader(f)
-	log.Println("LOAD_CONFIG(): Started new buffered reader...")
-	for {
-		n, err := br.Read(b)
-		if err != nil {
-			if err != io.EOF {
-				log.Fatalln("ERR: While reading from file: ", err)
-			}
-			log.Println("Reached EOF. Breaking...")
-			break;
-		}
-
-		log.Println("LOAD_CONFIG(): Number of bytes read: ", n)
-		log.Println("LOAD_CONFIG(): Byte slice read from file is: ", string(b[:n]))
-	}
-
-	log.Println("LOAD_CONFIG(): Byte slice read from file is: ", string(b))
+	b := getBytesFromReader(br, filesize)
 
 	err = yaml.Unmarshal(b, c)
 	if err != nil {
 		log.Fatal("ERR: ", err)
 	}
-
-	fmt.Println("LOAD_CONFIG(): MasterConfig is: ", c)
 }

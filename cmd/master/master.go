@@ -17,9 +17,6 @@ import (
 	"log"
 )
 
-// Move to config file/UI - currently only support one master
-//const numMasters = 1
-
 
 // Main just starts masters
 func main(){

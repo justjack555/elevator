@@ -34,7 +34,7 @@ func requestElevator(client *rpc.Client) *common.Elevator{
 	be utilized to form the RPC request to the selConfig
 	service.
  */
-func elevatorHandler(selConfig SelectionConfig) http.Handler {
+func elevatorHandler(selConfig *SelectionConfig) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 // 		Here we'll make the RPC call to the Selection Service
 		log.Println("ElevatorHandler():")
