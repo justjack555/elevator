@@ -50,7 +50,6 @@ func getBytesFromReader(br *bufio.Reader, size int64) []byte {
 			if err != io.EOF {
 				log.Fatalln("ERR: While reading from file: ", err)
 			}
-			log.Println("Reached EOF. Breaking...")
 			break;
 		}
 	}

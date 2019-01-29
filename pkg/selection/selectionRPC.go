@@ -11,7 +11,7 @@ import (
  */
 func (s *Selection) AssignElevator(req common.MasterAssignRequest, reply *common.MasterAssignReply) error {
 	log.Println("Selection.AssignElevator():")
-//	log.Println("Selection.AssignElevator(): Request: NumPeople: ", req.NumPeople, ", Floor: ", req.Floor)
+	log.Println("Selection.AssignElevator(): Request: NumPeople: ", req.NumPeople, ", Floor: ", req.Floor)
 
 	e :=  &common.Elevator {
 		IsActive : true,
